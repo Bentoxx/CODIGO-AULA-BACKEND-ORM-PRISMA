@@ -1,8 +1,8 @@
-import {Router} from 'express'
-import AuthorController from './controllers/author_controller'
+import { Router } from 'express'
+import AuthorController from './controllers/author-controller'
 
 const routes = Router()
 
-routes.post('./authors', new AuthorController().create)
+routes.post('/authors', new AuthorController().create)
 
 export default routes
