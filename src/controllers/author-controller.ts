@@ -6,9 +6,26 @@ export default class AuthorController {
         const { name, email, bio, cpf, pais } = req.body
 
         try {
-            const teste = await prisma.$queryRaw`SELECT * FROM authors`
-            console.log(teste)            
-            return res.send()
+            const emailExists = await prisma.author.findUnique({
+                where: {
+                    email
+                }
+            })
+            if (emailExists){
+                return res.status(400).json({
+                    message: 'The email provided already exists.'
+                })
+            }
+            const author = await prisma.author.create({
+                data: {
+                    name,
+                    email,
+                    bio,
+                    cpf,
+                    pais
+                }
+            })
+            return res.status(201).json(author)
         } catch (error) {
             const erro = error as Error
             return res.status(400).json({
