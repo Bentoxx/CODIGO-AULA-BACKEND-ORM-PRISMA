@@ -4,7 +4,6 @@ import prisma from "../prisma";
 export default class AuthorController {
     async create(req: Request, res: Response){
         const { name, email, bio, cpf, pais } = req.body
-
         try {
             const emailExists = await prisma.author.findUnique({
                 where: {
@@ -34,8 +33,7 @@ export default class AuthorController {
         }
     }
 
-    async list(req: Request, res: Response){
-        
+    async list(req: Request, res: Response){        
         try {
             const authors = await prisma.author.findMany()            
             return res.status(200).json(authors)
@@ -77,10 +75,74 @@ export default class AuthorController {
     }
 
     async update(req: Request, res: Response){
-
+        const { id } = req.params
+        const { name, email, bio, cpf, pais } = req.body
+        try {
+            const author = await prisma.author.findFirst({
+                where: {
+                    id: Number(id)
+                }
+            })
+            if(!author){
+                return res.status(400).json({
+                    message: 'No author found.'
+                })
+            }
+            const emailExists = await prisma.author.findUnique({
+                where: {
+                    email
+                }
+            })
+            if (emailExists && emailExists.email !== email){
+                return res.status(400).json({
+                    message: 'The email provided already exists.'
+                })
+            }
+            const author1 = await prisma.author.update({
+                where:{
+                    id: Number(id)
+                },
+                data: {
+                    name,
+                    email,
+                    bio,
+                    cpf,
+                    pais
+                }
+            })
+            return res.status(204).send()
+        } catch (error) {
+            const erro = error as Error
+            return res.status(400).json({
+                message: erro.message
+            })
+        }
     }
 
     async delete(req: Request, res: Response){
-
+        const { id } = req.params
+        try {
+            const author = await prisma.author.findFirst({
+                where: {
+                    id: Number(id)
+                }
+            })
+            if(!author){
+                return res.status(400).json({
+                    message: 'No author found.'
+                })
+            }
+            await prisma.author.delete({
+                where: {
+                    id: Number(id)
+                }
+            })
+            return res.status(204).send()
+        } catch (error) {
+            const erro = error as Error
+            return res.status(400).json({
+                message: erro.message
+            })
+        }
     }
 }
