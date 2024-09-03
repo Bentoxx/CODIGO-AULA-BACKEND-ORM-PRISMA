@@ -35,11 +35,45 @@ export default class AuthorController {
     }
 
     async list(req: Request, res: Response){
-
+        
+        try {
+            const authors = await prisma.author.findMany()            
+            return res.status(200).json(authors)
+        } catch (error) {
+            const erro = error as Error
+            return res.status(400).json({
+                message: erro.message
+            })
+        }
     }
 
     async show(req: Request, res: Response){
-
+        const { id } = req.params
+        try {
+            //retorna apenas um registro filtrado pelo id ou algum outro campo único
+            // const author = await prisma.author.findUnique({
+            //     where: {
+            //         id: Number(id)
+            //     }
+            // })
+            //retorna apenas o primeiro registro filtrado, mesmo que o campo informando não seja único
+            const author = await prisma.author.findFirst({
+                where: {
+                    id: Number(id)
+                }
+            })
+            if(!author){
+                return res.status(400).json({
+                    message: 'No author found.'
+                })
+            }
+            return res.status(200).json(author)
+        } catch (error) {
+            const erro = error as Error
+            return res.status(400).json({
+                message: erro.message
+            })
+        }
     }
 
     async update(req: Request, res: Response){
